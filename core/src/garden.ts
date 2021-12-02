@@ -92,11 +92,11 @@ import {
 } from "./config/module-template"
 import { TemplatedModuleConfig } from "./plugins/templated"
 import { BuildDirRsync } from "./build-staging/rsync"
-import { EnterpriseApi } from "./enterprise/api"
+import { CloudApi } from "./cloud/api"
 import { DefaultEnvironmentContext, RemoteSourceConfigContext } from "./config/template-contexts/project"
 import { OutputConfigContext } from "./config/template-contexts/module"
 import { ProviderConfigContext } from "./config/template-contexts/provider"
-import { getSecrets } from "./enterprise/get-secrets"
+import { getSecrets } from "./cloud/get-secrets"
 import { killSyncDaemon } from "./plugins/kubernetes/mutagen"
 import { ConfigContext } from "./config/template-contexts/base"
 import { validateSchema, validateWithPath } from "./config/validation"
@@ -137,7 +137,7 @@ export interface GardenOpts {
   plugins?: RegisterPluginParam[]
   sessionId?: string
   variables?: PrimitiveMap
-  enterpriseApi?: EnterpriseApi
+  cloudApi?: CloudApi
 }
 
 export interface GardenParams {
@@ -171,7 +171,7 @@ export interface GardenParams {
   vcs: VcsHandler
   workingCopyId: string
   forceRefresh?: boolean
-  enterpriseApi?: EnterpriseApi | null
+  cloudApi?: CloudApi | null
 }
 
 @Profile()
@@ -224,7 +224,7 @@ export class Garden {
   public readonly username?: string
   public readonly version: string
   private readonly forceRefresh: boolean
-  public readonly enterpriseApi: EnterpriseApi | null
+  public readonly cloudApi: CloudApi | null
   public readonly disablePortForwards: boolean
   public readonly commandInfo: CommandInfo
 
@@ -258,7 +258,7 @@ export class Garden {
     this.username = params.username
     this.vcs = params.vcs
     this.forceRefresh = !!params.forceRefresh
-    this.enterpriseApi = params.enterpriseApi || null
+    this.cloudApi = params.cloudApi || null
     this.commandInfo = params.opts.commandInfo
     this.cache = params.cache
 
@@ -1266,22 +1266,22 @@ export async function resolveGardenParams(currentDirectory: string, opts: Garden
   const sessionId = opts.sessionId || uuidv4()
 
   let secrets: StringMap = {}
-  const enterpriseApi = opts.enterpriseApi || null
-  if (!opts.noEnterprise && enterpriseApi) {
+  const cloudApi = opts.cloudApi || null
+  if (!opts.noEnterprise && cloudApi) {
     const enterpriseLog = log.info({ section: "garden-enterprise", msg: "Initializing...", status: "active" })
 
     try {
-      secrets = await getSecrets({ log: enterpriseLog, environmentName, enterpriseApi })
+      secrets = await getSecrets({ log: enterpriseLog, environmentName, cloudApi })
       enterpriseLog.setSuccess({ msg: chalk.green("Ready"), append: true })
-      enterpriseLog.silly(`Fetched ${Object.keys(secrets).length} secrets from ${enterpriseApi.domain}`)
+      enterpriseLog.silly(`Fetched ${Object.keys(secrets).length} secrets from ${cloudApi.domain}`)
     } catch (err) {
       enterpriseLog.debug(`Fetching secrets failed with error: ${err.message}`)
       enterpriseLog.setWarn()
     }
   }
 
-  const loggedIn = !!enterpriseApi
-  const enterpriseDomain = enterpriseApi?.domain
+  const loggedIn = !!cloudApi
+  const enterpriseDomain = cloudApi?.domain
 
   config = resolveProjectConfig({
     defaultEnvironment: defaultEnvironmentName,
@@ -1362,7 +1362,7 @@ export async function resolveGardenParams(currentDirectory: string, opts: Garden
     username: _username,
     vcs,
     forceRefresh: opts.forceRefresh,
-    enterpriseApi,
+    cloudApi,
     cache: treeCache,
   }
 }
