@@ -28,11 +28,11 @@ export async function getSecrets({ log, environmentName, enterpriseApi }: GetSec
     secrets = res.data
   } catch (err) {
     if (isGotError(err, 404)) {
-      log.debug("No secrets were received from Garden Enterprise.")
+      log.debug("No secrets were received from Garden Cloud.")
       log.debug("")
       log.debug(deline`
-        Either the environment ${environmentName} does not exist in Garden Enterprise, or no project
-        with the id in your project configuration exists in Garden Enterprise.
+        Either the environment ${environmentName} does not exist in Garden Cloud, or no project
+        with the id in your project configuration exists in Garden Cloud.
       `)
       log.debug("")
       log.debug(deline`

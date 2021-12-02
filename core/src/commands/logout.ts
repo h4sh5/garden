@@ -14,12 +14,12 @@ import { dedent } from "../util/string"
 
 export class LogOutCommand extends Command {
   name = "logout"
-  help = "Log out of Garden Enterprise."
+  help = "Log out of Garden Cloud."
   hidden = true
   noProject = true
 
   description = dedent`
-    Logs you out of Garden Enterprise.
+    Logs you out of Garden Cloud.
   `
 
   printHeader({ headerLog }) {
@@ -29,7 +29,7 @@ export class LogOutCommand extends Command {
   async action({ garden, log }: CommandParams): Promise<CommandResult> {
     const token = await ClientAuthToken.findOne()
     if (!token) {
-      log.info({ msg: `You're already logged out from Garden Enterprise.` })
+      log.info({ msg: `You're already logged out from Garden Cloud.` })
       return {}
     }
 
@@ -50,14 +50,14 @@ export class LogOutCommand extends Command {
       enterpriseApi.close()
     } catch (err) {
       const msg = dedent`
-      The following issue occurred while logging out from Garden Enterprise (your session will be cleared regardless): ${err.message}\n
+      The following issue occurred while logging out from Garden Cloud (your session will be cleared regardless): ${err.message}\n
       `
       log.warn({
         symbol: "warning",
         msg,
       })
     } finally {
-      log.info({ msg: `Succesfully logged out from Garden Enterprise.` })
+      log.info({ msg: `Succesfully logged out from Garden Cloud.` })
       await EnterpriseApi.clearAuthToken(log)
     }
     return {}

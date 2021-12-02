@@ -17,7 +17,7 @@ import { EventBus } from "../events"
 
 export class LoginCommand extends Command {
   name = "login"
-  help = "Log in to Garden Enterprise."
+  help = "Log in to Garden Cloud."
   hidden = true
 
   /**
@@ -27,7 +27,7 @@ export class LoginCommand extends Command {
   noProject = true
 
   description = dedent`
-    Logs you in to Garden Enterprise. Subsequent commands will have access to enterprise features.
+    Logs you in to Garden Cloud. Subsequent commands will have access to enterprise features.
   `
 
   printHeader({ headerLog }) {
@@ -50,7 +50,7 @@ export class LoginCommand extends Command {
       if (err?.detail?.statusCode === 401) {
         const msg = dedent`
           Looks like your session token is invalid. If you were previously logged into a different instance
-          of Garden Enterprise, log out first before logging in.
+          of Garden Cloud, log out first before logging in.
         `
         log.warn({ msg, symbol: "warning" })
         log.info("")
@@ -74,7 +74,7 @@ export class LoginCommand extends Command {
 export async function login(log: LogEntry, enterpriseDomain: string, events: EventBus) {
   // Start auth redirect server and wait for its redirect handler to receive the redirect and finish running.
   const server = new AuthRedirectServer(enterpriseDomain, events, log)
-  log.debug(`Redirecting to Garden Enterprise login page...`)
+  log.debug(`Redirecting to Garden Cloud login page...`)
   const response: AuthTokenResponse = await new Promise(async (resolve, _reject) => {
     // The server resolves the promise with the new auth token once it's received the redirect.
     await server.start()
